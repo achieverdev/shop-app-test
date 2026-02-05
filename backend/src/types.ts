@@ -31,7 +31,8 @@ export interface StoreState {
     products: Product[];
     orders: Order[];
     discountCodes: DiscountCode[];
-    nthOrderCount: number; // Configurable: Every nth order gets a discount
-    discountPercentage: number; // Configurable: x% discount
-    nextOrderNumber: number; // Current count of orders to find nth
+    carts: Record<string, CartItem[]>; // itemId -> quantity mapped by userId
+    nthOrderCount: number;
+    discountPercentage: number;
+    nextOrderNumber: number;
 }

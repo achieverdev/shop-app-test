@@ -11,13 +11,42 @@ class Store {
         products: INITIAL_PRODUCTS,
         orders: [],
         discountCodes: [],
-        nthOrderCount: 5, // Every 5th order generates a coupon
-        discountPercentage: 10, // 10% discount
+        carts: {},
+        nthOrderCount: 5,
+        discountPercentage: 10,
         nextOrderNumber: 1,
     };
 
     getProducts() {
         return this.state.products;
+    }
+
+    getCart(userId: string) {
+        return this.state.carts[userId] || [];
+    }
+
+    addToCart(userId: string, productId: string, quantity: number) {
+        if (!this.state.carts[userId]) {
+            this.state.carts[userId] = [];
+        }
+
+        const product = this.state.products.find(p => p.id === productId);
+        if (!product) throw new Error('Product not found');
+
+        const existingItem = this.state.carts[userId].find(item => item.productId === productId);
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            this.state.carts[userId].push({
+                productId,
+                quantity,
+                price: product.price
+            });
+        }
+    }
+
+    clearCart(userId: string) {
+        this.state.carts[userId] = [];
     }
 
     getOrders() {
