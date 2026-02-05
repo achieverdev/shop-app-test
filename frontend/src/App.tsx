@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Layout from './components/Layout';
 import { StoreProvider, useStore } from './context/StoreContext';
+import Shop from './components/Shop';
+import type { CartItem } from './types';
 
 const AppContent: React.FC = () => {
   const { cart, loading } = useStore();
@@ -14,20 +16,12 @@ const AppContent: React.FC = () => {
     );
   }
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = cart.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
 
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab} cartCount={cartCount}>
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-        {activeTab === 'shop' && (
-          <section>
-            <h2 className="text-3xl font-bold mb-2">Curated Collection</h2>
-            <p className="text-neutral-400 mb-8">Discover our premium range of artisanal products.</p>
-            <div className="p-20 border border-dashed border-neutral-800 rounded-3xl text-center text-neutral-500">
-              Shop content coming in next commit...
-            </div>
-          </section>
-        )}
+        {activeTab === 'shop' && <Shop />}
         {activeTab === 'cart' && (
           <section>
             <h2 className="text-3xl font-bold mb-2">Your Cart</h2>

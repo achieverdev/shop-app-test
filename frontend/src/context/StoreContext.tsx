@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Product, CartItem, Order, AdminStats } from '../types';
+import type { Product, CartItem, Order, AdminStats } from '../types';
 import { ProductService, CartService, CheckoutService, AdminService } from '../services/api';
 
 interface StoreContextType {
