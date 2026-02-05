@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Trash2, ArrowRight, Tag, Ticket, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Trash2, ArrowRight, Tag, Ticket, CheckCircle2, RefreshCw } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
+import { DiscountService } from '../services/api';
 
 const Cart: React.FC = () => {
-    const { cart, products, checkout, refreshCart } = useStore();
+    const { cart, products, checkout } = useStore();
     const [discountCode, setDiscountCode] = useState('');
+    const [appliedDiscount, setAppliedDiscount] = useState<{ code: string; percentage: number } | null>(null);
+    const [isValidating, setIsValidating] = useState(false);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [reward, setReward] = useState<{ message: string; code: string } | null>(null);
     const [successOrder, setSuccessOrder] = useState<any>(null);
@@ -20,14 +23,29 @@ const Cart: React.FC = () => {
     });
 
     const totalAmount = cartDetails.reduce((sum, item) => sum + item.subtotal, 0);
+    const discountAmount = appliedDiscount ? Math.floor(totalAmount * (appliedDiscount.percentage / 100)) : 0;
+    const finalTotal = totalAmount - discountAmount;
+
+    const handleApplyDiscount = async () => {
+        if (!discountCode.trim()) return;
+        setIsValidating(true);
+        try {
+            const result = await DiscountService.validate(discountCode);
+            setAppliedDiscount({ code: discountCode, percentage: result.percentage });
+        } catch (error: any) {
+            alert(error.response?.data?.error || "Invalid code");
+            setAppliedDiscount(null);
+        } finally {
+            setIsValidating(false);
+        }
+    };
 
     const handleCheckout = async () => {
         setIsCheckingOut(true);
         try {
-            const result = await checkout(discountCode);
+            const result = await checkout(appliedDiscount?.code || '');
             setSuccessOrder(result.order);
             setReward(result.reward);
-            // After success, we might want to stay on success screen
         } catch (error: any) {
             alert(error.response?.data?.error || error.message);
         } finally {
@@ -72,7 +90,7 @@ const Cart: React.FC = () => {
                     onClick={() => {
                         setSuccessOrder(null);
                         setReward(null);
-                        window.location.reload(); // Quick way to reset tab to shop
+                        window.location.reload();
                     }}
                     className="bg-white text-neutral-900 px-8 py-4 rounded-2xl font-bold hover:shadow-xl transition-all"
                 >
@@ -90,7 +108,7 @@ const Cart: React.FC = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-2">Your cart is empty</h3>
                 <p className="text-neutral-500 italic max-w-sm mx-auto">
-                    Fine taste takes time, but your cart shouldn't stay empty. Explore our collection.
+                    Fine taste takes time, but your cart shouldn't stay empty.
                 </p>
             </div>
         );
@@ -130,6 +148,15 @@ const Cart: React.FC = () => {
                             <span>Subtotal</span>
                             <span>${totalAmount}</span>
                         </div>
+                        {appliedDiscount && (
+                            <div className="flex justify-between text-emerald-500 animate-in fade-in slide-in-from-right-4">
+                                <span className="flex items-center gap-1">
+                                    <Tag size={14} />
+                                    Discount ({appliedDiscount.percentage}%)
+                                </span>
+                                <span>-${discountAmount}</span>
+                            </div>
+                        )}
                         <div className="flex justify-between text-neutral-400">
                             <span>Shipping</span>
                             <span className="text-emerald-500 font-medium">Free</span>
@@ -137,7 +164,7 @@ const Cart: React.FC = () => {
                         <div className="h-px bg-neutral-800 my-4"></div>
                         <div className="flex justify-between text-2xl font-bold">
                             <span>Total</span>
-                            <span>${totalAmount}</span>
+                            <span>${finalTotal}</span>
                         </div>
                     </div>
 
@@ -149,11 +176,34 @@ const Cart: React.FC = () => {
                             <input
                                 type="text"
                                 value={discountCode}
-                                onChange={(e) => setDiscountCode(e.target.value)}
+                                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                                 placeholder="Enter code"
+                                disabled={!!appliedDiscount}
                                 className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors uppercase font-mono text-sm"
                             />
+                            {appliedDiscount ? (
+                                <button
+                                    onClick={() => { setAppliedDiscount(null); setDiscountCode(''); }}
+                                    className="bg-neutral-800 p-3 rounded-xl hover:bg-neutral-700 transition-colors"
+                                >
+                                    <RefreshCw size={18} />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleApplyDiscount}
+                                    disabled={isValidating || !discountCode}
+                                    className="bg-blue-600 px-4 rounded-xl hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-50"
+                                >
+                                    {isValidating ? <RefreshCw size={18} className="animate-spin" /> : 'Apply'}
+                                </button>
+                            )}
                         </div>
+                        {appliedDiscount && (
+                            <p className="mt-2 text-xs text-emerald-500 flex items-center gap-1 font-medium">
+                                <CheckCircle2 size={12} />
+                                Code "{appliedDiscount.code}" applied!
+                            </p>
+                        )}
                         <p className="mt-2 text-xs text-neutral-600 italic">
                             Rewards are generated every 5th order.
                         </p>
@@ -184,7 +234,6 @@ const Cart: React.FC = () => {
     );
 };
 
-// Helper for shield icon since I missed importing it in the main block
 const ShieldCheck: React.FC<{ size?: number }> = ({ size = 16 }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="m9 12 2 2 4-4" /></svg>
 );

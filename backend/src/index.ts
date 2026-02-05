@@ -4,6 +4,7 @@ import { globalStore } from './store';
 import cartRoutes from './routes/cart';
 import checkoutRoutes from './routes/checkout';
 import adminRoutes from './routes/admin';
+import discountRoutes from './routes/discount';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,6 +21,7 @@ app.get('/api/products', (req: Request, res: Response) => {
 app.use('/api/cart', cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/discount', discountRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

@@ -3,7 +3,7 @@ import Layout from './components/Layout';
 import { StoreProvider, useStore } from './context/StoreContext';
 import Shop from './components/Shop';
 import Cart from './components/Cart';
-import type { CartItem } from './types';
+import Admin from './components/Admin';
 
 const AppContent: React.FC = () => {
   const { cart, loading } = useStore();
@@ -24,15 +24,7 @@ const AppContent: React.FC = () => {
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
         {activeTab === 'shop' && <Shop />}
         {activeTab === 'cart' && <Cart />}
-        {activeTab === 'admin' && (
-          <section>
-            <h2 className="text-3xl font-bold mb-2">Admin Panel</h2>
-            <p className="text-neutral-400 mb-8">Store performance and discount system management.</p>
-            <div className="p-20 border border-dashed border-neutral-800 rounded-3xl text-center text-neutral-500">
-              Admin dashboard coming in next commit...
-            </div>
-          </section>
-        )}
+        {activeTab === 'admin' && <Admin />}
       </div>
     </Layout>
   );

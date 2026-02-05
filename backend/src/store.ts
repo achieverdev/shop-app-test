@@ -133,6 +133,14 @@ class Store {
         return null;
     }
 
+    validateDiscount(code: string): { valid: boolean; percentage?: number } {
+        const discount = this.state.discountCodes.find(dc => dc.code === code && !dc.isUsed);
+        if (discount) {
+            return { valid: true, percentage: discount.discountPercentage };
+        }
+        return { valid: false };
+    }
+
     getState() {
         return this.state;
     }

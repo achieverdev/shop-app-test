@@ -1,4 +1,5 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { AxiosResponse } from 'axios';
 import type { Product, CartItem, Order, AdminStats } from '../types';
 
 const api = axios.create({
@@ -24,4 +25,10 @@ export const CheckoutService = {
 export const AdminService = {
     getStats: () => api.get<AdminStats>('/admin/stats').then((res: AxiosResponse<AdminStats>) => res.data),
     generateCode: () => api.post('/admin/generate-code').then((res: AxiosResponse) => res.data),
+};
+
+export const DiscountService = {
+    validate: (code: string) =>
+        api.post<{ valid: boolean; percentage: number; message: string }>('/discount/validate', { code })
+            .then((res: AxiosResponse<{ valid: boolean; percentage: number; message: string }>) => res.data),
 };
