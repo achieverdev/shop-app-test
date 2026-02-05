@@ -25,11 +25,13 @@ npm run dev
 ---
 
 ## ✨ Key Features
-- **Artisan Catalog**: 8 premium coffee products with high-resolution Unsplash imagery.
-- **Discount Engine**: Automatically generates a 10% discount code for every 2nd order placed on the system.
-- **Admin Dashboard**: Real-time analytics, order history tracking, and manual reward management.
-- **Advanced Logging**: Conditional backend logging for tracking transaction flow and inventory logic.
-- **Premium UI**: Dark-mode aesthetic with smooth hover animations and responsive layouts.
+Product List: A catalog of items with clear photos and descriptions.
+
+Automatic Rewards: The system gives a 10% discount code to every 2nd order completed.
+
+Admin Tools: A private page to view sales stats, see previous orders, and manage discount codes.
+
+Order Tracking: Backend logs that record exactly how items move from the cart to a finished order.
 
 ## 🛠️ Architecture Decisions
 For detailed information on the design choices made for this project, see [DECISIONS.md](./DECISIONS.md).

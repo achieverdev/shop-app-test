@@ -1,20 +1,4 @@
-## checklist: implemented backend business logic features
 
-### user features
-- [x] **add to cart**: cart creation by id and quantity management.
-- [x] **cart view**: cart retrieval by unique ID.
-- [x] **checkout processing**:
-    - [x] **subtotal calculation**: subTotal of items.
-    - [x] **empty cart validation**: prevents invalid checkouts.
-    - [x] **discount application**: 10% percentage-based logic on entire order.
-    - [x] **order creation**: record generation with unique IDs and timestamps.
-    - [x] **cart expiry**: immediate session cleanup post-checkout.
-- [x] **dynamic coupon generation**: automated every 3rd order (nth order logic).
-
-### admin features
-- [x] **real-time statistics**: global aggregation of orders, items, revenue, and discounts.
-- [x] **discount code management**: usage tracking for all generated codes.
-- [x] **manual code generation**: generate code.
 ---
 ### Feature list: 
 ### For Customers
