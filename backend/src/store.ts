@@ -1,4 +1,4 @@
-import { StoreState, Product } from './types';
+import { StoreState, Product, Order } from './types';
 
 const INITIAL_PRODUCTS: Product[] = [
     { id: '1', name: 'Premium Coffee Beans', price: 25 },
@@ -47,6 +47,52 @@ class Store {
 
     clearCart(userId: string) {
         this.state.carts[userId] = [];
+    }
+
+    placeOrder(userId: string, discountCode?: string): { order: Order; generatedCode: string | null } {
+        const cartItems = this.getCart(userId);
+        if (cartItems.length === 0) throw new Error('Cart is empty');
+
+        let totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        let discountAmount = 0;
+
+        // 1. Validate and Apply Discount Code
+        if (discountCode) {
+            const validCode = this.state.discountCodes.find(
+                dc => dc.code === discountCode && !dc.isUsed
+            );
+
+            if (!validCode) {
+                throw new Error('Invalid or already used discount code');
+            }
+
+            discountAmount = (totalAmount * validCode.discountPercentage) / 100;
+            validCode.isUsed = true;
+        }
+
+        const finalAmount = totalAmount - discountAmount;
+
+        const order: Order = {
+            id: `ord_${Math.random().toString(36).substring(2, 9)}`,
+            items: [...cartItems],
+            totalAmount,
+            discountAmount,
+            finalAmount,
+            discountCode,
+            createdAt: new Date()
+        };
+
+        this.state.orders.push(order);
+        this.clearCart(userId);
+
+        // 2. nth Order Discount Generation Logic
+        let generatedCode: string | null = null;
+        if (this.state.orders.length % this.state.nthOrderCount === 0) {
+            generatedCode = `DISCOUNT_${Math.random().toString(36).toUpperCase().substring(2, 8)}`;
+            this.addDiscountCode(generatedCode, order.id);
+        }
+
+        return { order, generatedCode };
     }
 
     getOrders() {

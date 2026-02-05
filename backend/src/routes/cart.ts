@@ -1,18 +1,15 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { globalStore } from '../store';
 
 const router = Router();
-
-// For simplicity, we'll use a hardcoded userId "user_1"
-// In a real app, this would come from auth middleware
 const DEFAULT_USER_ID = 'user_1';
 
-router.get('/', (req, res) => {
+router.get('/', (req: Request, res: Response) => {
     const cart = globalStore.getCart(DEFAULT_USER_ID);
     res.json(cart);
 });
 
-router.post('/add', (req, res) => {
+router.post('/add', (req: Request, res: Response) => {
     const { productId, quantity } = req.body;
 
     if (!productId || !quantity || quantity <= 0) {
