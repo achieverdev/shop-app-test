@@ -25,10 +25,23 @@ export const DiscountService = {
     },
 
     /**
-     * Manually triggers code generation if milestone is met.
+     * Manually triggers reward generation for the current milestone.
      */
     manualGenerate(): string | null {
-        return globalStore.manualDiscountGeneration();
+        const orders = globalStore.getOrders();
+        const currentCount = orders.length;
+        const nth = globalStore.getState().nthOrderCount;
+
+        if (currentCount > 0 && currentCount % nth === 0) {
+            // Check if a code already exists for the latest order
+            const lastOrder = orders[orders.length - 1];
+            const alreadyGenerated = globalStore.getDiscountCodes().some(dc => dc.orderIdGeneratedFrom === lastOrder?.id);
+
+            if (!alreadyGenerated && lastOrder) {
+                return this.generateMilestoneCode(lastOrder.id);
+            }
+        }
+        return null;
     },
 
     /**

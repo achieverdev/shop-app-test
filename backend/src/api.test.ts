@@ -13,7 +13,7 @@ describe('API Endpoints', () => {
     test('GET /api/products should return product list', async () => {
         const res = await request(app).get('/api/products');
         expect(res.status).toBe(200);
-        expect(res.body).toHaveLength(3);
+        expect(res.body).toHaveLength(8);
     });
 
     test('POST /api/cart/add should add item', async () => {

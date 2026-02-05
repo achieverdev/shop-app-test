@@ -143,13 +143,13 @@ We don't need to save data permanently
 
 ---
 
-## decision: route-to-service mapping pattern
+## decision: tri-layer architecture (routes, services, store)
 
-**context:** Organizing backend logic.
+**context:** Organizing backend logic to separate transport (HTTP), business rules, and state management.
 
 **options considered:**
-- option a: logic directly in route handlers
-- option b: separate `Router` objects calling dedicated `Service` functions
+- option a: monolithic handlers with direct state access
+- option b: tri-layer separation (Routes -> Services -> Store)
 
 **choice:** option b
 

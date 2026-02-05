@@ -64,73 +64,7 @@ class Store {
         this.state.carts[userId] = [];
     }
 
-    placeOrder(userId: string, discountCode?: string): { order: Order; generatedCode: string | null } {
-        this.log('Processing checkout...', { userId, discountCode });
-        const cartItems = this.getCart(userId);
-        if (cartItems.length === 0) {
-            this.log('Error: Cart is empty.');
-            throw new Error('Cart is empty');
-        }
-
-        let totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        let discountAmount = 0;
-
-        // 3. APPLY DISCOUNT LOGIC
-        // Rule: Only unused codes created by the system are valid.
-        // SECURITY NOTE: We perform a strict check on isUsed to prevent double-spending of codes.
-        if (discountCode) {
-            const validCode = this.state.discountCodes.find(
-                dc => dc.code === discountCode && !dc.isUsed
-            );
-
-            if (!validCode) {
-                this.log('Error: Invalid or used discount code provided.', { code: discountCode });
-                throw new Error('Invalid or already used discount code');
-            }
-
-            // Calculate the discount value based on the code's percentage
-            discountAmount = (totalAmount * validCode.discountPercentage) / 100;
-            validCode.isUsed = true; // Mark as spent so it can't be reused
-            this.log('Discount applied successfully!', { code: discountCode, amount: discountAmount });
-        }
-
-        const finalAmount = totalAmount - discountAmount;
-
-        // 4. Record the final purchase
-        // SECURITY NOTE: Order IDs are generated randomly. 
-        // FIXME: For high-scale production, use UUIDs or a database sequence to ensure uniqueness and prevent id collision.
-        const order: Order = {
-            id: `ord_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-            items: [...cartItems],
-            totalAmount,
-            discountAmount,
-            finalAmount,
-            discountCode,
-            createdAt: new Date()
-        };
-
-        this.state.orders.push(order);
-        this.clearCart(userId);
-        this.log('Order placed successfully.', { orderId: order.id, total: order.finalAmount });
-
-        // 5. REWARD ENGINE LOGIC
-        // Rule: Every "nthOrderCount" orders (currently set to 2), generate a one-time code.
-        // This encourages customer retention by rewarding repeat purchases.
-        let generatedCode: string | null = null;
-        if (this.state.orders.length % this.state.nthOrderCount === 0) {
-            generatedCode = `DISCOUNT_${Date.now()}#${Math.floor(Math.random() * 1000)}`;
-            this.addDiscountCode(generatedCode, order.id);
-            this.log('Milestone reached! New discount code generated.', { code: generatedCode });
-        }
-
-        return { order, generatedCode };
-    }
-
-    getOrders() {
-        return this.state.orders;
-    }
-
-    addOrder(order: any) {
+    addOrder(order: Order) {
         this.state.orders.push(order);
         this.state.nextOrderNumber++;
     }
@@ -148,20 +82,13 @@ class Store {
         });
     }
 
-    manualDiscountGeneration(): string | null {
-        const currentCount = this.state.orders.length;
-        if (currentCount > 0 && currentCount % this.state.nthOrderCount === 0) {
-            // Check if a code already exists for the latest order
-            const lastOrder = this.state.orders[currentCount - 1];
-            const alreadyGenerated = this.state.discountCodes.some(dc => dc.orderIdGeneratedFrom === lastOrder?.id);
+    markDiscountAsUsed(code: string) {
+        const dc = this.state.discountCodes.find(c => c.code === code);
+        if (dc) dc.isUsed = true;
+    }
 
-            if (!alreadyGenerated && lastOrder) {
-                const code = `ADMIN_DISCOUNT_${Math.random().toString(36).toUpperCase().substring(2, 8)}`;
-                this.addDiscountCode(code, lastOrder.id);
-                return code;
-            }
-        }
-        return null;
+    getOrders() {
+        return this.state.orders;
     }
 
     validateDiscount(code: string): { valid: boolean; percentage?: number } {
