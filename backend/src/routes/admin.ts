@@ -32,25 +32,24 @@ router.get('/stats', (req: Request, res: Response) => {
 
 // 2. Generate a discount code if the condition is satisfied (manual trigger/validation)
 router.post('/generate-code', (req: Request, res: Response) => {
-    const orders = globalStore.getOrders();
-    const nth = globalStore.getState().nthOrderCount;
+    const generatedCode = globalStore.manualDiscountGeneration();
 
-    // Check if we are exactly at an nth order milestone and hasn't generated for it yet?
-    // Actually, the requirement says "if the condition above is satisfied".
-    // Our 'placeOrder' already generates it automatically.
-    // This API can serve as a "status check" or a way to see if the NEXT order will be a discount.
+    if (generatedCode) {
+        res.status(201).json({
+            message: "Discount code generated successfully.",
+            code: generatedCode
+        });
+    } else {
+        const state = globalStore.getState();
+        const currentCount = state.orders.length;
+        const nth = state.nthOrderCount;
 
-    const currentCount = orders.length;
-    const isSatisfied = currentCount > 0 && currentCount % nth === 0;
-
-    res.json({
-        currentOrderCount: currentCount,
-        nthMilestone: nth,
-        isConditionSatisfied: isSatisfied,
-        message: isSatisfied
-            ? "Condition is satisfied. Records show a code should have been generated."
-            : `Condition not satisfied. ${nth - (currentCount % nth)} more orders needed.`
-    });
+        res.status(400).json({
+            error: "Condition not satisfied or code already exists for this milestone.",
+            currentOrderCount: currentCount,
+            nextMilestone: (Math.floor(currentCount / nth) + 1) * nth
+        });
+    }
 });
 
 export default router;

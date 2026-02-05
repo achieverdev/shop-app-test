@@ -117,6 +117,22 @@ class Store {
         });
     }
 
+    manualDiscountGeneration(): string | null {
+        const currentCount = this.state.orders.length;
+        if (currentCount > 0 && currentCount % this.state.nthOrderCount === 0) {
+            // Check if a code already exists for the latest order
+            const lastOrder = this.state.orders[currentCount - 1];
+            const alreadyGenerated = this.state.discountCodes.some(dc => dc.orderIdGeneratedFrom === lastOrder?.id);
+
+            if (!alreadyGenerated && lastOrder) {
+                const code = `ADMIN_DISCOUNT_${Math.random().toString(36).toUpperCase().substring(2, 8)}`;
+                this.addDiscountCode(code, lastOrder.id);
+                return code;
+            }
+        }
+        return null;
+    }
+
     getState() {
         return this.state;
     }
