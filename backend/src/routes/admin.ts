@@ -4,7 +4,8 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { globalStore } from '../store';
+import { OrderService } from '../services/order.service';
+import { DiscountService } from '../services/discount.service';
 
 const router = Router();
 
@@ -13,42 +14,13 @@ const router = Router();
 // SECURITY NOTE: This endpoint should ideally be restricted to admin users via middleware.
 // FIXME: Currently open for development simplified access. Add Auth middleware for production.
 router.get('/stats', (req: Request, res: Response) => {
-    const orders = globalStore.getOrders();
-    const discountCodes = globalStore.getDiscountCodes();
-
-    let totalItemsPurchased = 0;
-    let totalRevenue = 0;
-    let totalDiscountGiven = 0;
-
-    // Iterate through all orders to calculate high-level metrics
-    orders.forEach(order => {
-        totalItemsPurchased += order.items.reduce((sum, item) => sum + item.quantity, 0);
-        totalRevenue += order.totalAmount;
-        totalDiscountGiven += order.discountAmount;
-    });
-
-    res.json({
-        totalItemsPurchased, // Output: Sum of all units sold
-        totalRevenue,        // Output: Money before discounts
-        totalDiscountGiven,  // Output: Total value of saved money by users
-        orders: orders.map(o => ({
-            id: o.id,
-            total: o.totalAmount,
-            discount: o.discountAmount,
-            items: o.items.reduce((sum, item) => sum + item.quantity, 0),
-            timestamp: new Date().toISOString()
-        })).reverse(), // Return newest orders first
-        discountCodes: discountCodes.map(dc => ({
-            code: dc.code,
-            isUsed: dc.isUsed,
-            percentage: dc.discountPercentage
-        }))
-    });
+    const stats = OrderService.getStoreStats();
+    res.json(stats);
 });
 
 // 2. Generate a discount code if the condition is satisfied (manual trigger/validation)
 router.post('/generate-code', (req: Request, res: Response) => {
-    const generatedCode = globalStore.manualDiscountGeneration();
+    const generatedCode = DiscountService.manualGenerate();
 
     if (generatedCode) {
         res.status(201).json({
@@ -56,9 +28,7 @@ router.post('/generate-code', (req: Request, res: Response) => {
             code: generatedCode
         });
     } else {
-        const state = globalStore.getState();
-        const currentCount = state.orders.length;
-        const nth = state.nthOrderCount;
+        const { currentCount, nth } = DiscountService.getMilestoneInfo();
 
         res.status(400).json({
             error: "Condition not satisfied or code already exists for this milestone.",

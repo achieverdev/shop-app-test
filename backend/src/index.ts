@@ -5,6 +5,7 @@ import cartRoutes from './routes/cart';
 import checkoutRoutes from './routes/checkout';
 import adminRoutes from './routes/admin';
 import discountRoutes from './routes/discount';
+import productRoutes from './routes/product';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,10 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get('/api/products', (req: Request, res: Response) => {
-    res.json(globalStore.getProducts());
-});
-
+app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/admin', adminRoutes);

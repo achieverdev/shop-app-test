@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { globalStore } from '../store';
+import { CartService } from '../services/cart.service';
 
 const router = Router();
 const DEFAULT_USER_ID = 'user_1';
 
 router.get('/', (req: Request, res: Response) => {
-    const cart = globalStore.getCart(DEFAULT_USER_ID);
+    const cart = CartService.getCart(DEFAULT_USER_ID);
     res.json(cart);
 });
 
@@ -25,8 +25,8 @@ router.post('/add', (req: Request, res: Response) => {
     }
 
     try {
-        globalStore.addToCart(DEFAULT_USER_ID, productId, Number(quantity));
-        res.json({ message: 'Item added to cart', cart: globalStore.getCart(DEFAULT_USER_ID) });
+        const updatedCart = CartService.addItem(DEFAULT_USER_ID, productId, Number(quantity));
+        res.json({ message: 'Item added to cart', cart: updatedCart });
     } catch (error: any) {
         res.status(404).json({ error: error.message });
     }

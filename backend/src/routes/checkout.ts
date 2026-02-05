@@ -4,7 +4,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { globalStore } from '../store';
+import { OrderService } from '../services/order.service';
 
 const router = Router();
 
@@ -16,13 +16,13 @@ router.post('/', (req: Request, res: Response) => {
     const { discountCode } = req.body;
 
     try {
-        const { order, generatedCode } = globalStore.placeOrder(DEFAULT_USER_ID, discountCode);
+        const { order, rewardCode } = OrderService.processCheckout(DEFAULT_USER_ID, discountCode);
         res.status(201).json({
             message: 'Checkout successful',
             order,
-            reward: generatedCode ? {
+            reward: rewardCode ? {
                 message: `Congratulations! You've received a discount code for being our nth customer!`,
-                code: generatedCode
+                code: rewardCode
             } : null
         });
     } catch (error: any) {

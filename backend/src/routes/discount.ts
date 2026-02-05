@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { globalStore } from '../store';
+import { DiscountService } from '../services/discount.service';
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router.post('/validate', (req: Request, res: Response) => {
         return res.status(400).json({ error: 'Discount code is required' });
     }
 
-    const result = globalStore.validateDiscount(code);
+    const result = DiscountService.validateCode(code);
 
     if (result.valid) {
         res.json({
