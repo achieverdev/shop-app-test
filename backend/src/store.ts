@@ -1,3 +1,12 @@
+/**
+ * @file store.ts
+ * @description The central in-memory data store for the Uniblox Store.
+ * Handles state management for products, carts, orders, and the discount engine.
+ * 
+ * SECURITY NOTE: This uses in-memory storage. For production, this must be migrated 
+ * to a persistent database (e.g., PostgreSQL or MongoDB) with proper ACID compliance.
+ */
+
 import { StoreState, Product, Order } from './types';
 
 const INITIAL_PRODUCTS: Product[] = [
@@ -66,7 +75,9 @@ class Store {
         let totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         let discountAmount = 0;
 
-        // 1. Validate and Apply Discount Code
+        // 3. APPLY DISCOUNT LOGIC
+        // Rule: Only unused codes created by the system are valid.
+        // SECURITY NOTE: We perform a strict check on isUsed to prevent double-spending of codes.
         if (discountCode) {
             const validCode = this.state.discountCodes.find(
                 dc => dc.code === discountCode && !dc.isUsed
@@ -77,13 +88,17 @@ class Store {
                 throw new Error('Invalid or already used discount code');
             }
 
+            // Calculate the discount value based on the code's percentage
             discountAmount = (totalAmount * validCode.discountPercentage) / 100;
-            validCode.isUsed = true;
+            validCode.isUsed = true; // Mark as spent so it can't be reused
             this.log('Discount applied successfully!', { code: discountCode, amount: discountAmount });
         }
 
         const finalAmount = totalAmount - discountAmount;
 
+        // 4. Record the final purchase
+        // SECURITY NOTE: Order IDs are generated randomly. 
+        // FIXME: For high-scale production, use UUIDs or a database sequence to ensure uniqueness and prevent id collision.
         const order: Order = {
             id: `ord_${Math.random().toString(36).substring(2, 9)}`,
             items: [...cartItems],
@@ -98,7 +113,9 @@ class Store {
         this.clearCart(userId);
         this.log('Order placed successfully.', { orderId: order.id, total: order.finalAmount });
 
-        // 2. nth Order Discount Generation Logic
+        // 5. REWARD ENGINE LOGIC
+        // Rule: Every "nthOrderCount" orders (currently set to 2), generate a one-time code.
+        // This encourages customer retention by rewarding repeat purchases.
         let generatedCode: string | null = null;
         if (this.state.orders.length % this.state.nthOrderCount === 0) {
             generatedCode = `DISCOUNT_${Math.random().toString(36).toUpperCase().substring(2, 8)}`;

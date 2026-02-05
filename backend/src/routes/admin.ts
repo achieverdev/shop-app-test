@@ -1,3 +1,8 @@
+/**
+ * @file admin.ts
+ * @description Admin-only routes for system analytics and manual intervention.
+ */
+
 import { Router, Request, Response } from 'express';
 import { globalStore } from '../store';
 
@@ -5,6 +10,8 @@ const router = Router();
 
 // 1. AGGREGATE ANALYTICS
 // This route calculates revenue and discounts across all historical orders.
+// SECURITY NOTE: This endpoint should ideally be restricted to admin users via middleware.
+// FIXME: Currently open for development simplified access. Add Auth middleware for production.
 router.get('/stats', (req: Request, res: Response) => {
     const orders = globalStore.getOrders();
     const discountCodes = globalStore.getDiscountCodes();

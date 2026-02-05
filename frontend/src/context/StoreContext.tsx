@@ -1,3 +1,9 @@
+/**
+ * @file StoreContext.tsx
+ * @description The functional bridge between the frontend UI and the backend API.
+ * Manages global React state for products, cart, and admin statistics.
+ */
+
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { Product, CartItem, Order, AdminStats } from '../types';
 import { ProductService, CartService, CheckoutService, AdminService } from '../services/api';
@@ -38,6 +44,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const checkout = async (code?: string) => {
         const result = await CheckoutService.checkout(code);
+        // Implementation: We immediately refresh the local cart and stats 
+        // after a successful checkout to ensure the UI stays in sync with 
+        // the backend (orders history, new reward generation, etc).
         await refreshCart();
         await refreshStats();
         return result;

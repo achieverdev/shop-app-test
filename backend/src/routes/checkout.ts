@@ -1,7 +1,15 @@
+/**
+ * @file checkout.ts
+ * @description API endpoint for processing orders and generating rewards.
+ */
+
 import { Router, Request, Response } from 'express';
 import { globalStore } from '../store';
 
 const router = Router();
+
+// FIXME: Using a hardcoded user ID for the simplified prototype.
+// For production, this should be extracted from a JWT token or session.
 const DEFAULT_USER_ID = 'user_1';
 
 router.post('/', (req: Request, res: Response) => {
