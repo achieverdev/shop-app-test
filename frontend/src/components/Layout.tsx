@@ -17,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, cart
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
                             <StoreIcon size={18} />
                         </div>
-                        <span>LUXE<span className="text-blue-500">STORE</span></span>
+                        <span>UNIBLOX <span className="text-blue-500">STORE</span></span>
                     </div>
 
                     <nav className="flex gap-1 bg-neutral-800/50 p-1 rounded-xl">
@@ -30,8 +30,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, cart
                                 key={item.id}
                                 onClick={() => setActiveTab(item.id as any)}
                                 className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 ${activeTab === item.id
-                                        ? 'bg-blue-600 text-white shadow-md'
-                                        : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800'
+                                    ? 'bg-blue-600 text-white shadow-md'
+                                    : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800'
                                     }`}
                             >
                                 <item.icon size={16} />
@@ -47,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, cart
             </main>
 
             <footer className="border-t border-neutral-800 py-8 text-center text-neutral-500 text-sm">
-                <p>&copy; 2026 Luxe Store. Minimalist Ecommerce Assignment.</p>
+                <p>&copy; 2026 Uniblox Store. Minimalist Ecommerce Assignment.</p>
             </footer>
         </div>
     );

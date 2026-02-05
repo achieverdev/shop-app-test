@@ -18,6 +18,7 @@ const Cart: React.FC = () => {
         return {
             ...item,
             name: product?.name || 'Unknown Product',
+            image: product?.image || '',
             subtotal: item.price * item.quantity
         };
     });
@@ -121,8 +122,14 @@ const Cart: React.FC = () => {
                 <div className="flex flex-col gap-6">
                     {cartDetails.map((item) => (
                         <div key={item.productId} className="flex items-center gap-6 p-6 bg-neutral-900/50 border border-neutral-800 rounded-3xl group">
-                            <div className="w-20 h-20 bg-neutral-800 rounded-2xl flex items-center justify-center text-neutral-600">
-                                <ShoppingCart size={24} />
+                            <div className="w-20 h-20 bg-neutral-800 rounded-2xl overflow-hidden shrink-0">
+                                {item.image ? (
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-neutral-600">
+                                        <ShoppingCart size={24} />
+                                    </div>
+                                )}
                             </div>
                             <div className="flex-1">
                                 <h4 className="text-xl font-bold group-hover:text-blue-400 transition-colors">{item.name}</h4>

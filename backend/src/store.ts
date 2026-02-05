@@ -1,9 +1,14 @@
 import { StoreState, Product, Order } from './types';
 
 const INITIAL_PRODUCTS: Product[] = [
-    { id: '1', name: 'Premium Coffee Beans', price: 25 },
-    { id: '2', name: 'Artisan Mug', price: 15 },
-    { id: '3', name: 'French Press', price: 45 },
+    { id: '1', name: 'Premium Coffee Beans', price: 25, image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=600' },
+    { id: '2', name: 'Artisan Mug', price: 15, image: 'https://images.unsplash.com/photo-1517256011271-bfbd3ca47695?auto=format&fit=crop&q=80&w=600' },
+    { id: '3', name: 'French Press', price: 45, image: 'https://images.unsplash.com/photo-1544190153-c359d9976906?auto=format&fit=crop&q=80&w=600' },
+    { id: '4', name: 'Moka Pot', price: 35, image: 'https://images.unsplash.com/photo-1594056293967-33157fbe198d?auto=format&fit=crop&q=80&w=600' },
+    { id: '5', name: 'Glass Dripper', price: 20, image: 'https://images.unsplash.com/photo-1545665225-b23b9d8c9bc8?auto=format&fit=crop&q=80&w=600' },
+    { id: '6', name: 'Coffee Grinder', price: 60, image: 'https://images.unsplash.com/photo-1589396396315-996ff52e67a0?auto=format&fit=crop&q=80&w=600' },
+    { id: '7', name: 'Milk Frother', price: 12, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&q=80&w=600' },
+    { id: '8', name: 'Travel Tumbler', price: 30, image: 'https://images.unsplash.com/photo-1516335017463-205167732d84?auto=format&fit=crop&q=80&w=600' },
 ];
 
 class Store {

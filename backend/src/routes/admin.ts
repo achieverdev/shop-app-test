@@ -3,7 +3,8 @@ import { globalStore } from '../store';
 
 const router = Router();
 
-// 1. Lists count of items purchased, revenue, discount codes and total discounts given.
+// 1. AGGREGATE ANALYTICS
+// This route calculates revenue and discounts across all historical orders.
 router.get('/stats', (req: Request, res: Response) => {
     const orders = globalStore.getOrders();
     const discountCodes = globalStore.getDiscountCodes();
@@ -12,6 +13,7 @@ router.get('/stats', (req: Request, res: Response) => {
     let totalRevenue = 0;
     let totalDiscountGiven = 0;
 
+    // Iterate through all orders to calculate high-level metrics
     orders.forEach(order => {
         totalItemsPurchased += order.items.reduce((sum, item) => sum + item.quantity, 0);
         totalRevenue += order.totalAmount;
@@ -19,16 +21,16 @@ router.get('/stats', (req: Request, res: Response) => {
     });
 
     res.json({
-        totalItemsPurchased,
-        totalRevenue,
-        totalDiscountGiven,
+        totalItemsPurchased, // Output: Sum of all units sold
+        totalRevenue,        // Output: Money before discounts
+        totalDiscountGiven,  // Output: Total value of saved money by users
         orders: orders.map(o => ({
             id: o.id,
             total: o.totalAmount,
             discount: o.discountAmount,
             items: o.items.length,
-            timestamp: new Date().toISOString() // Placeholder for timestamp
-        })).reverse(),
+            timestamp: new Date().toISOString()
+        })).reverse(), // Return newest orders first
         discountCodes: discountCodes.map(dc => ({
             code: dc.code,
             isUsed: dc.isUsed,

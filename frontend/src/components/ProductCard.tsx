@@ -28,8 +28,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
     return (
         <div className="group bg-neutral-900 border border-neutral-800 rounded-3xl p-6 transition-all duration-300 hover:border-neutral-700 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-1">
-            <div className="aspect-square bg-neutral-800 rounded-2xl mb-6 flex items-center justify-center text-neutral-600 group-hover:bg-neutral-800/80 transition-colors">
-                <ShoppingCart size={48} strokeWidth={1} />
+            <div className="aspect-square bg-neutral-800 rounded-2xl mb-6 overflow-hidden group-hover:shadow-lg transition-all">
+                <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
             </div>
 
             <div className="mb-6">
