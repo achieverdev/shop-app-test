@@ -22,6 +22,13 @@ router.get('/stats', (req: Request, res: Response) => {
         totalItemsPurchased,
         totalRevenue,
         totalDiscountGiven,
+        orders: orders.map(o => ({
+            id: o.id,
+            total: o.totalAmount,
+            discount: o.discountAmount,
+            items: o.items.length,
+            timestamp: new Date().toISOString() // Placeholder for timestamp
+        })).reverse(),
         discountCodes: discountCodes.map(dc => ({
             code: dc.code,
             isUsed: dc.isUsed,

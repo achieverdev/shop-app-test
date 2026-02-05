@@ -12,7 +12,7 @@ class Store {
         orders: [],
         discountCodes: [],
         carts: {},
-        nthOrderCount: 5,
+        nthOrderCount: 2, // Default is now 2
         discountPercentage: 10,
         nextOrderNumber: 1,
     };

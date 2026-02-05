@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, ShoppingBag, DollarSign, Percent, Ticket, RefreshCw, AlertCircle } from 'lucide-react';
+import { TrendingUp, ShoppingBag, DollarSign, Percent, Ticket, RefreshCw, AlertCircle, Clock, CheckCircle2, History } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { AdminService } from '../services/api';
 
@@ -36,7 +36,7 @@ const Admin: React.FC = () => {
         { label: 'Total Revenue', value: `$${stats.totalRevenue}`, icon: DollarSign, color: 'text-blue-500', bg: 'bg-blue-500/10' },
         { label: 'Items Sold', value: stats.totalItemsPurchased, icon: ShoppingBag, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
         { label: 'Total Discounts', value: `$${stats.totalDiscountGiven}`, icon: Percent, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-        { label: 'Active Milestones', value: stats.discountCodes.length, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+        { label: 'Orders Placed', value: stats.orders?.length || 0, icon: History, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     ];
 
     return (
@@ -67,43 +67,59 @@ const Admin: React.FC = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 <div className="lg:col-span-2">
                     <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8">
                         <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                            <Ticket size={24} className="text-blue-500" />
-                            Discount Code Registry
+                            <History size={24} className="text-purple-500" />
+                            Recent Orders
                         </h3>
-                        <div className="space-y-4">
-                            {stats.discountCodes.length === 0 ? (
-                                <p className="text-neutral-600 italic">No codes generated yet. Milestone rewards appear here.</p>
-                            ) : (
-                                stats.discountCodes.map((code, i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 bg-neutral-950 border border-neutral-800 rounded-2xl">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-2 h-2 rounded-full ${code.isUsed ? 'bg-neutral-700' : 'bg-emerald-500 animate-pulse'}`}></div>
-                                            <span className="font-mono text-lg font-bold tracking-wider">{code.code}</span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-sm px-3 py-1 bg-neutral-800 rounded-lg text-neutral-400">
-                                                {code.percentage}% OFF
-                                            </span>
-                                            <span className={`text-xs font-bold uppercase tracking-widest ${code.isUsed ? 'text-neutral-600' : 'text-emerald-500'}`}>
-                                                {code.isUsed ? 'Consumed' : 'Available'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="text-neutral-500 text-xs uppercase tracking-widest border-b border-neutral-800">
+                                    <tr>
+                                        <th className="pb-4 pt-2">Order ID</th>
+                                        <th className="pb-4 pt-2">Items</th>
+                                        <th className="pb-4 pt-2">Discount</th>
+                                        <th className="pb-4 pt-2">Total</th>
+                                        <th className="pb-4 pt-2 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-neutral-800/50">
+                                    {stats.orders && stats.orders.length > 0 ? (
+                                        stats.orders.slice(0, 5).map((order) => (
+                                            <tr key={order.id} className="group hover:bg-white/5 transition-colors">
+                                                <td className="py-4 font-mono text-sm text-neutral-300">#{order.id.split('-')[0]}</td>
+                                                <td className="py-4 text-neutral-400">{order.items} unit(s)</td>
+                                                <td className="py-4 text-emerald-500 font-medium">{order.discount > 0 ? `-$${order.discount}` : '—'}</td>
+                                                <td className="py-4 font-bold">${order.total}</td>
+                                                <td className="py-4 text-right">
+                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-500 rounded-full text-xs font-bold uppercase">
+                                                        <CheckCircle2 size={12} />
+                                                        Success
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={5} className="py-12 text-center text-neutral-600 italic">No orders recorded yet.</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
 
                 <div className="lg:col-span-1">
-                    <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8">
-                        <h3 className="text-2xl font-bold mb-4">System Actions</h3>
-                        <p className="text-neutral-500 text-sm mb-8">
-                            Manually trigger a discount code generation if the nth order condition is met but it was missed.
+                    <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8 h-full">
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                            <Percent size={24} className="text-amber-500" />
+                            System Actions
+                        </h3>
+                        <p className="text-neutral-500 text-sm mb-8 leading-relaxed">
+                            Manually trigger a discount code generation if the milestone condition is met.
                         </p>
 
                         {message && (
@@ -117,18 +133,40 @@ const Admin: React.FC = () => {
                         <button
                             onClick={handleGenerate}
                             disabled={isGenerating}
-                            className="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3 transition-all disabled:opacity-50"
+                            className="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50"
                         >
-                            {isGenerating ? (
-                                <RefreshCw size={18} className="animate-spin" />
-                            ) : (
-                                <>
-                                    <Percent size={18} />
-                                    <span>Generate Milestone Code</span>
-                                </>
-                            )}
+                            {isGenerating ? <RefreshCw size={18} className="animate-spin" /> : <Ticket size={18} />}
+                            <span>Generate Code</span>
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-8">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <History size={24} className="text-blue-500" />
+                    Discount Code Registry
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {stats.discountCodes.map((code, i) => (
+                        <div key={i} className="flex items-center justify-between p-5 bg-neutral-950 border border-neutral-800 rounded-2xl group hover:border-neutral-700 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className={`w-2.5 h-2.5 rounded-full ${code.isUsed ? 'bg-neutral-800' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`}></div>
+                                <span className="font-mono text-lg font-bold tracking-widest">{code.code}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <span className="text-xs px-2 py-1 bg-neutral-800 rounded-md text-neutral-400 font-bold uppercase">{code.percentage}% OFF</span>
+                                <span className={`text-[10px] font-black uppercase tracking-tighter ${code.isUsed ? 'text-neutral-700' : 'text-emerald-500'}`}>
+                                    {code.isUsed ? 'Consumed' : 'Ready'}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                    {stats.discountCodes.length === 0 && (
+                        <div className="col-span-full py-8 text-center text-neutral-600 italic bg-neutral-950/50 border border-dashed border-neutral-800 rounded-2xl">
+                            No milestone codes generated. Rewards will appear here.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

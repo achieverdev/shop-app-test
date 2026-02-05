@@ -24,6 +24,7 @@ export interface AdminStats {
     totalItemsPurchased: number;
     totalRevenue: number;
     totalDiscountGiven: number;
+    orders: Order[];
     discountCodes: {
         code: string;
         isUsed: boolean;
