@@ -100,7 +100,7 @@ class Store {
         // SECURITY NOTE: Order IDs are generated randomly. 
         // FIXME: For high-scale production, use UUIDs or a database sequence to ensure uniqueness and prevent id collision.
         const order: Order = {
-            id: `ord_${Math.random().toString(36).substring(2, 9)}`,
+            id: `ord_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
             items: [...cartItems],
             totalAmount,
             discountAmount,
@@ -118,7 +118,7 @@ class Store {
         // This encourages customer retention by rewarding repeat purchases.
         let generatedCode: string | null = null;
         if (this.state.orders.length % this.state.nthOrderCount === 0) {
-            generatedCode = `DISCOUNT_${Math.random().toString(36).toUpperCase().substring(2, 8)}`;
+            generatedCode = `DISCOUNT_${Date.now()}#${Math.floor(Math.random() * 1000)}`;
             this.addDiscountCode(generatedCode, order.id);
             this.log('Milestone reached! New discount code generated.', { code: generatedCode });
         }
