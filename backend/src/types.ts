@@ -35,4 +35,5 @@ export interface StoreState {
     nthOrderCount: number;
     discountPercentage: number;
     nextOrderNumber: number;
+    enableLogging: boolean;
 }

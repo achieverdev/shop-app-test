@@ -15,6 +15,7 @@ class Store {
         nthOrderCount: 2, // Default is now 2
         discountPercentage: 10,
         nextOrderNumber: 1,
+        enableLogging: true,
     };
 
     getProducts() {
@@ -50,8 +51,12 @@ class Store {
     }
 
     placeOrder(userId: string, discountCode?: string): { order: Order; generatedCode: string | null } {
+        this.log('Processing checkout...', { userId, discountCode });
         const cartItems = this.getCart(userId);
-        if (cartItems.length === 0) throw new Error('Cart is empty');
+        if (cartItems.length === 0) {
+            this.log('Error: Cart is empty.');
+            throw new Error('Cart is empty');
+        }
 
         let totalAmount = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         let discountAmount = 0;
@@ -63,11 +68,13 @@ class Store {
             );
 
             if (!validCode) {
+                this.log('Error: Invalid or used discount code provided.', { code: discountCode });
                 throw new Error('Invalid or already used discount code');
             }
 
             discountAmount = (totalAmount * validCode.discountPercentage) / 100;
             validCode.isUsed = true;
+            this.log('Discount applied successfully!', { code: discountCode, amount: discountAmount });
         }
 
         const finalAmount = totalAmount - discountAmount;
@@ -84,12 +91,14 @@ class Store {
 
         this.state.orders.push(order);
         this.clearCart(userId);
+        this.log('Order placed successfully.', { orderId: order.id, total: order.finalAmount });
 
         // 2. nth Order Discount Generation Logic
         let generatedCode: string | null = null;
         if (this.state.orders.length % this.state.nthOrderCount === 0) {
             generatedCode = `DISCOUNT_${Math.random().toString(36).toUpperCase().substring(2, 8)}`;
             this.addDiscountCode(generatedCode, order.id);
+            this.log('Milestone reached! New discount code generated.', { code: generatedCode });
         }
 
         return { order, generatedCode };
@@ -134,11 +143,20 @@ class Store {
     }
 
     validateDiscount(code: string): { valid: boolean; percentage?: number } {
+        this.log('Validating discount code...', { code });
         const discount = this.state.discountCodes.find(dc => dc.code === code && !dc.isUsed);
         if (discount) {
+            this.log('Discount code is valid.', { percentage: discount.discountPercentage });
             return { valid: true, percentage: discount.discountPercentage };
         }
+        this.log('Discount code is invalid.', { code });
         return { valid: false };
+    }
+
+    private log(message: string, data?: any) {
+        if (this.state.enableLogging) {
+            console.log(`[STORE LOG] ${new Date().toISOString()} - ${message}`, data ? JSON.stringify(data, null, 2) : '');
+        }
     }
 
     getState() {
