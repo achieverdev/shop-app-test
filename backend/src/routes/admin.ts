@@ -28,7 +28,7 @@ router.get('/stats', (req: Request, res: Response) => {
             id: o.id,
             total: o.totalAmount,
             discount: o.discountAmount,
-            items: o.items.length,
+            items: o.items.reduce((sum, item) => sum + item.quantity, 0),
             timestamp: new Date().toISOString()
         })).reverse(), // Return newest orders first
         discountCodes: discountCodes.map(dc => ({

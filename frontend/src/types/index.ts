@@ -21,11 +21,19 @@ export interface Order {
     createdAt: string;
 }
 
+export interface AdminOrderSummary {
+    id: string;
+    total: number;
+    discount: number;
+    items: number;
+    timestamp: string;
+}
+
 export interface AdminStats {
     totalItemsPurchased: number;
     totalRevenue: number;
     totalDiscountGiven: number;
-    orders: Order[];
+    orders: AdminOrderSummary[];
     discountCodes: {
         code: string;
         isUsed: boolean;
