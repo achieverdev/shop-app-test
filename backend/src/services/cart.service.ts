@@ -5,6 +5,7 @@
 
 import { globalStore } from '../store';
 import { CartItem } from '../types';
+import { Logger } from '../utils/logger';
 
 export const CartService = {
     /**
@@ -18,6 +19,7 @@ export const CartService = {
      * Adds an item to a user's cart.
      */
     addItem(userId: string, productId: string, quantity: number) {
+        Logger.trace('CART_SERVICE', 'Adding item to cart', { userId, productId, quantity });
         globalStore.addToCart(userId, productId, quantity);
         return this.getCart(userId);
     },
@@ -26,6 +28,7 @@ export const CartService = {
      * Removes all items from a user's cart.
      */
     clearCart(userId: string) {
+        Logger.trace('CART_SERVICE', 'Clearing user cart', { userId });
         globalStore.clearCart(userId);
     }
 };

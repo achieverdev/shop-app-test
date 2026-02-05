@@ -6,6 +6,7 @@
 import { globalStore } from '../store';
 import { Order } from '../types';
 import { DiscountService } from './discount.service';
+import { Logger } from '../utils/logger';
 
 export const OrderService = {
     /**
@@ -13,9 +14,11 @@ export const OrderService = {
      * Logic: Verify Cart -> Apply Discount -> Save Order -> Generate Reward.
      */
     processCheckout(userId: string, discountCode?: string): { order: Order; rewardCode: string | null } {
-        // Implementation: Business logic moved from Store to Service
+        Logger.trace('ORDER_SERVICE', 'Starting checkout process', { userId, discountCode });
+
         const cartItems = globalStore.getCart(userId);
         if (cartItems.length === 0) {
+            Logger.trace('ORDER_SERVICE', 'Checkout failed: Cart is empty');
             throw new Error('Cart is empty');
         }
 
@@ -24,13 +27,16 @@ export const OrderService = {
 
         // 1. APPLY DISCOUNT LOGIC
         if (discountCode) {
+            Logger.trace('ORDER_SERVICE', 'Applying discount code', { discountCode });
             const validate = DiscountService.validateCode(discountCode);
             if (!validate.valid) {
+                Logger.trace('ORDER_SERVICE', 'Checkout failed: Invalid discount code', { discountCode });
                 throw new Error('Invalid or already used discount code');
             }
 
             discountAmount = (totalAmount * (validate.percentage || 0)) / 100;
             globalStore.markDiscountAsUsed(discountCode);
+            Logger.trace('ORDER_SERVICE', 'Discount applied successfully', { discountAmount, percentage: validate.percentage });
         }
 
         const finalAmount = totalAmount - discountAmount;
@@ -48,6 +54,7 @@ export const OrderService = {
 
         globalStore.addOrder(order);
         globalStore.clearCart(userId);
+        Logger.trace('ORDER_SERVICE', 'Order saved and cart cleared', { orderId: order.id, finalAmount });
 
         // 3. REWARD ENGINE LOGIC
         let rewardCode: string | null = null;
@@ -55,7 +62,9 @@ export const OrderService = {
         const nth = globalStore.getState().nthOrderCount;
 
         if (currentOrders.length % nth === 0) {
+            Logger.trace('ORDER_SERVICE', 'Nth order milestone reached. Generating reward.', { orderCount: currentOrders.length, milestone: nth });
             rewardCode = DiscountService.generateMilestoneCode(order.id);
+            Logger.trace('ORDER_SERVICE', 'Reward generated', { rewardCode });
         }
 
         return { order, rewardCode };

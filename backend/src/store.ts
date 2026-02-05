@@ -8,6 +8,7 @@
  */
 
 import { StoreState, Product, Order } from './types';
+import { Logger } from './utils/logger';
 
 const INITIAL_PRODUCTS: Product[] = [
     { id: '1', name: 'Premium Coffee Beans', price: 25, image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=600' },
@@ -90,20 +91,14 @@ class Store {
     }
 
     validateDiscount(code: string): { valid: boolean; percentage?: number } {
-        this.log('Validating discount code...', { code });
+        Logger.trace('STORE', 'Validating discount code...', { code });
         const discount = this.state.discountCodes.find(dc => dc.code === code && !dc.isUsed);
         if (discount) {
-            this.log('Discount code is valid.', { percentage: discount.discountPercentage });
+            Logger.trace('STORE', 'Discount code is valid.', { percentage: discount.discountPercentage });
             return { valid: true, percentage: discount.discountPercentage };
         }
-        this.log('Discount code is invalid.', { code });
+        Logger.trace('STORE', 'Discount code is invalid.', { code });
         return { valid: false };
-    }
-
-    private log(message: string, data?: any) {
-        if (this.state.enableLogging) {
-            console.log(`[STORE LOG] ${new Date().toISOString()} - ${message}`, data ? JSON.stringify(data, null, 2) : '');
-        }
     }
 
     getState() {

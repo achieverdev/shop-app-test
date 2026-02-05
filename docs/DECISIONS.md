@@ -159,3 +159,16 @@ We don't need to save data permanently
 
 
 
+## decision: centralized flag-based tracing
+
+**context:** Business logic decisions (why a discount failed, when a milestone was hit) were invisible to developers during execution.
+
+**options considered:**
+- option a: standard console.logs scattered in code
+- option b: dedicated `Logger` utility checking `globalStore.enableLogging`
+
+**choice:** option b
+
+**why:** Centralizing the logging logic ensures consistency. By checking the `enableLogging` flag inside a utility, we avoid cluttering every service with `if (state.enableLogging)` checks. This allows for detailed "Tracing" of the system's state during runtime without polluting production logs unless explicitly enabled.
+
+---

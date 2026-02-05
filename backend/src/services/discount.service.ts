@@ -4,6 +4,7 @@
  */
 
 import { globalStore } from '../store';
+import { Logger } from '../utils/logger';
 
 export const DiscountService = {
     /**
@@ -21,6 +22,7 @@ export const DiscountService = {
     generateMilestoneCode(orderId: string): string {
         const code = `DISCOUNT_${Date.now()}#${Math.floor(Math.random() * 1000)}`;
         globalStore.addDiscountCode(code, orderId);
+        Logger.trace('DISCOUNT_SERVICE', 'Milestone code generated and stored', { code, orderId });
         return code;
     },
 
@@ -28,6 +30,7 @@ export const DiscountService = {
      * Manually triggers reward generation for the current milestone.
      */
     manualGenerate(): string | null {
+        Logger.trace('DISCOUNT_SERVICE', 'Manual reward check triggered');
         const orders = globalStore.getOrders();
         const currentCount = orders.length;
         const nth = globalStore.getState().nthOrderCount;
@@ -38,8 +41,13 @@ export const DiscountService = {
             const alreadyGenerated = globalStore.getDiscountCodes().some(dc => dc.orderIdGeneratedFrom === lastOrder?.id);
 
             if (!alreadyGenerated && lastOrder) {
+                Logger.trace('DISCOUNT_SERVICE', 'Manual generation approved: Milestone met and no existing code.', { orderId: lastOrder.id });
                 return this.generateMilestoneCode(lastOrder.id);
+            } else {
+                Logger.trace('DISCOUNT_SERVICE', 'Manual generation skipped: Code already exists for this milestone order.', { orderId: lastOrder?.id });
             }
+        } else {
+            Logger.trace('DISCOUNT_SERVICE', 'Manual generation skipped: Milestone not met.', { currentCount, nth });
         }
         return null;
     },
