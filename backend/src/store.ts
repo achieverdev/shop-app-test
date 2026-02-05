@@ -28,7 +28,6 @@ class Store {
         carts: {},
         nthOrderCount: 2, // Default is now 2
         discountPercentage: 10,
-        nextOrderNumber: 1,
         enableLogging: true,
     };
 
@@ -66,7 +65,6 @@ class Store {
 
     addOrder(order: Order) {
         this.state.orders.push(order);
-        this.state.nextOrderNumber++;
     }
 
     getDiscountCodes() {

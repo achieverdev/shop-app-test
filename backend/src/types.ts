@@ -47,6 +47,5 @@ export interface StoreState {
     carts: Record<string, CartItem[]>; // Keyed by userId
     nthOrderCount: number;             // Frequency of reward generation (e.g., set to 2)
     discountPercentage: number;        // Reward percentage (e.g., 10%)
-    nextOrderNumber: number;           // Sequential counter for order IDs
     enableLogging: boolean;            // Global flag to toggle backend console logs
 }
